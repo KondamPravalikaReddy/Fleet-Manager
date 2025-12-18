@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Manager - Operations Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .app-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .nav-section {
+            padding: 16px 8px;
+        }
+
+        .nav-section-title {
+            padding: 0 12px;
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #555;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .nav-item.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-left-color: #2563eb;
+            font-weight: 500;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: auto;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .settings-icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        /* Dashboard */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .kpi-icon.total {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        .kpi-icon.available {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .kpi-icon.working {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        .kpi-icon.maintenance {
+            background-color: #fffbeb;
+            color: #f59e0b;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-bar {
+            display: flex;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            gap: 2px;
+        }
+
+        .status-segment {
+            flex: 1;
+            background-color: #ddd;
+        }
+
+        .status-segment.available {
+            background-color: #10b981;
+        }
+
+        .status-segment.working {
+            background-color: #2563eb;
+        }
+
+        .status-segment.maintenance {
+            background-color: #f59e0b;
+        }
+
+        .status-segment.inactive {
+            background-color: #9ca3af;
+        }
+
+        .status-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .legend-dot.available {
+            background-color: #10b981;
+        }
+
+        .legend-dot.working {
+            background-color: #2563eb;
+        }
+
+        .legend-dot.maintenance {
+            background-color: #f59e0b;
+        }
+
+        .legend-dot.inactive {
+            background-color: #9ca3af;
+        }
+
+        .recent-activity {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background-color: #eff6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            flex-shrink: 0;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-fleet {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .activity-description {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .activity-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .status-working {
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+
+        .status-maintenance {
+            background-color: #fffbeb;
+            color: #f59e0b;
+        }
+
+        .status-inactive {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+        }
+
+        /* Fleet Inventory */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 400px;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .filter-dropdown {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table thead {
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Forms */
+        .form-section {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: #ef4444;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            padding: 10px 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 0;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* Work Assignments */
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .assignment-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+
+        .assignment-header {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .assignment-fleet {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .assignment-number {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .assignment-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .assignment-body {
+            padding: 16px;
+        }
+
+        .assignment-detail {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .assignment-label {
+            color: #999;
+            font-weight: 500;
+        }
+
+        .assignment-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .shift-section {
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+        }
+
+        .shift-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .shift-info {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        /* Reports */
+        .report-filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .report-filters .form-group {
+            flex: 0 1 auto;
+        }
+
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* Hidden by default - show when needed */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* Dark mode theme */
+        body.dark {
+            background-color: #020617;
+            color: #e5e7eb;
+        }
+
+        body.dark .kpi-card,
+        body.dark .chart-card,
+        body.dark .table-container,
+        body.dark .assignment-card,
+        body.dark .form-section,
+        body.dark .report-filters {
+            background-color: #0f172a;
+            color: #e5e7eb;
+            border-color: #1f2937;
+        }
+
+        body.dark .sidebar {
+            background-color: #020617;
+            border-color: #1f2937;
+        }
+
+        body.dark .top-bar {
+            background-color: #020617;
+            border-color: #1f2937;
+        }
+
+        body.dark .search-input,
+        body.dark .filter-dropdown,
+        body.dark .form-input,
+        body.dark .form-select {
+            background-color: #020617;
+            border-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        body.dark .table thead {
+            background-color: #020617;
+        }
+
+        body.dark .activity-item,
+        body.dark .shift-section {
+            background-color: #020617;
+        }
+
+        body.dark .nav-item.active {
+            background-color: #0f172a;
+            border-left-color: #60a5fa;
+        }
+
+        body.dark .modal-content {
+            background-color: #0f172a;
+            color: #e5e7eb;
+        }
+
+        body.dark .modal-header {
+            border-color: #1f2937;
+        }
+
+        /* Dark mode: make status chips text-only */
+        body.dark .status-badge {
+            background-color: transparent;
+            border-radius: 0;
+            padding: 0;
+        }
+
+        body.dark .status-badge.status-available {
+            color: #4ade80;
+        }
+
+        body.dark .status-badge.status-working {
+            color: #60a5fa;
+        }
+
+        body.dark .status-badge.status-maintenance {
+            color: #facc15;
+        }
+
+        body.dark .status-badge.status-inactive {
+            color: #9ca3af;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                flex-wrap: wrap;
+            }
+
+            .search-input {
+                max-width: 100%;
+            }
+        }
+        /* Sidebar collapse */
+.sidebar.collapsed {
+    width: 0;
+    border-right: none;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-header,
+.sidebar.collapsed .nav-section,
+.sidebar.collapsed .sidebar-footer {
+    display: none;
+}
+
+/* Make content use full width when sidebar collapsed */
+.container.sidebar-collapsed .main-content {
+    width: 100%;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <div class="logo-icon">⊞</div>
+                    <div>
+                        <div>Fleet Manager</div>
+                        <div class="app-subtitle">Operations Portal</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Navigation</div>
+                <div class="nav-item active" onclick="switchPage('dashboard')">
+                    <span class="nav-icon">⊞</span>
+                    Dashboard
+                </div>
+                <div class="nav-item" onclick="switchPage('inventory')">
+                    <span class="nav-icon">⊡</span>
+                    Fleet Inventory
+                </div>
+                <div class="nav-item" onclick="switchPage('assignments')">
+                    <span class="nav-icon">👤</span>
+                    Work Assignments
+                </div>
+                <div class="nav-item" onclick="switchPage('reports')">
+                    <span class="nav-icon">📋</span>
+                    Reports
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="user-name">Administrator</div>
+                        <div class="user-role">admin@fleet.com</div>
+                    </div>
+                    <div class="settings-icon">⚙️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+           <div class="top-bar">
+    <button class="fullscreen-toggle" onclick="toggleSidebar()">
+        ◀
+    </button>
+    <button class="theme-toggle">🌙</button>
+</div>
+
+
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page-content active">
+                    <div class="page-title">Dashboard</div>
+                    <div class="page-subtitle">Fleet operations overview</div>
+
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            
+                            <div>
+                                <div class="kpi-value" id="kpi-total">0</div>
+                                <div class="kpi-label">All registered equipment</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            
+                            <div>
+                                <div class="kpi-value" id="kpi-available">0</div>
+                                <div class="kpi-label">Ready for deployment</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            
+                            <div>
+                                <div class="kpi-value" id="kpi-working">0</div>
+                                <div class="kpi-label">Currently deployed</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            
+                            <div>
+                                <div class="kpi-value" id="kpi-maintenance">0</div>
+                                <div class="kpi-label">Under maintenance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="chart-card">
+                            <div class="chart-title">Equipment Status Distribution</div>
+                            <div class="status-bar">
+                                <div class="status-segment available" id="seg-available"></div>
+                                <div class="status-segment working" id="seg-working"></div>
+                                <div class="status-segment maintenance" id="seg-maintenance"></div>
+                                <div class="status-segment inactive" id="seg-inactive"></div>
+                            </div>
+                            <div class="status-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot available"></div>
+                                    <span>Available</span>
+                                    <span style="margin-left: auto; font-weight: 600;" id="legend-available">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot working"></div>
+                                    <span>Working</span>
+                                    <span style="margin-left: auto; font-weight: 600;" id="legend-working">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot maintenance"></div>
+                                    <span>Maintenance</span>
+                                    <span style="margin-left: auto; font-weight: 600;" id="legend-maintenance">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot inactive"></div>
+                                    <span>Inactive</span>
+                                    <span style="margin-left: auto; font-weight: 600;" id="legend-inactive">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-title">Recent Activity</div>
+                            <div class="recent-activity" id="recent-activity">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fleet Inventory Page -->
+                <div id="inventory" class="page-content">
+                    <div class="page-title">Fleet Inventory</div>
+                    <div class="page-subtitle">Manage and track all equipment</div>
+
+                    <div class="toolbar">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search fleet number, description, make...">
+                        <select id="statusFilter" class="filter-dropdown">
+                            <option>All Status</option>
+                            <option>Available</option>
+                            <option>Working</option>
+                            <option>Maintenance</option>
+                            <option>Inactive</option>
+                        </select>
+                        <select id="typeFilter" class="filter-dropdown">
+                            <option>All Types</option>
+                            <option>CC CRANE</option>
+                            <option>Truck</option>
+                            <option>Forklift</option>
+                        </select>
+                        <button class="btn btn-secondary" id="exportBtn">📥 Export CSV</button>
+                        <button class="btn btn-secondary" id="importBtn">📤 Import CSV</button>
+                        <button class="btn btn-primary" onclick="openAddEquipmentModal()">+ Add Equipment</button>
+                    </div>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Fleet Number</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Make</th>
+                                    <th>Model</th>
+                                    <th>Year</th>
+                                    <th>Status</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-body">
+                                <!-- Filled by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Work Assignments Page -->
+                <div id="assignments" class="page-content">
+                    <div class="page-title">Work Assignments</div>
+                    <div class="page-subtitle">Current shift assignments and operator details</div>
+
+                    <div class="assignments-grid" id="assignments-grid">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports" class="page-content">
+                    <div class="page-title">Reports</div>
+                    <div class="page-subtitle">Generate and export fleet utilization reports</div>
+
+                    <div class="report-filters">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-input" style="width: 180px;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-input" style="width: 180px;">
+                        </div>
+                        <button class="btn btn-secondary">Clear</button>
+                        <button class="btn btn-primary">📥 Export CSV</button>
+                    </div>
+
+                    <div class="report-summary">
+                        <div class="kpi-card">
+                            <div class="kpi-icon total">📋</div>
+                            <div>
+                                <div class="kpi-value" id="rep-total">0</div>
+                                <div class="kpi-label">In selected date range</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon available">👤</div>
+                            <div>
+                                <div class="kpi-value" id="rep-active">0</div>
+                                <div class="kpi-label">With operator assigned</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon working">⏱</div>
+                            <div>
+                                <div class="kpi-value" id="rep-hours">0</div>
+                                <div class="kpi-label">Combined working hours</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">Report Preview</div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Fleet Number</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Customer</th>
+                                        <th>Location</th>
+                                        <th>Operator (1st)</th>
+                                        <th>Operator (2nd)</th>
+                                        <th>Total Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-body">
+                                    <!-- Filled by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Equipment Modal -->
+    <div class="modal-overlay" id="addEquipmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Add Fleet Equipment</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">Register new fleet equipment</div>
+                </div>
+                <button class="modal-close" onclick="closeAddEquipmentModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-section">
+                    <div class="form-section-title">Fleet Information</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">S.No</label>
+                            <input type="text" class="form-input" placeholder="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Date</label>
+                            <input type="date" class="form-input" value="2025-12-05">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Fleet Number</label>
+                            <input type="text" class="form-input" placeholder="e.g., FL-001">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Fleet Entity</label>
+                            <input type="text" class="form-input" placeholder="Entity name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Fleet Description</label>
+                            <input type="text" class="form-input" placeholder="Equipment description">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Fleet Capacity</label>
+                            <input type="text" class="form-input" placeholder="e.g., 5 tons">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tail Capacity</label>
+                            <input type="text" class="form-input" placeholder="Tail capacity">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Fleet Type</label>
+                            <input type="text" class="form-input" placeholder="e.g., Truck, Crane, Forklift">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Equipment Details</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Equipment Category</label>
+                            <select class="form-select">
+                                <option>CRANE</option>
+                                <option>TRUCK</option>
+                                <option>FORKLIFT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Make</label>
+                            <input type="text" class="form-input" placeholder="Manufacturer">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Model</label>
+                            <input type="text" class="form-input" placeholder="Model">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Model Year</label>
+                            <input type="text" class="form-input" placeholder="2024" value="2024">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Chassis Number</label>
+                            <input type="text" class="form-input" placeholder="Chassis number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Serial Number</label>
+                            <input type="text" class="form-input" placeholder="Serial number">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Country</label>
+                            <input type="text" class="form-input" placeholder="Country">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Accessories</label>
+                            <input type="text" class="form-input" placeholder="Additional accessories">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Registration & Compliance</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Registration No</label>
+                            <input type="text" class="form-input" placeholder="0254 MALY" value="0254 MALY">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Reg Expiry Date</label>
+                            <input type="date" class="form-input" value="2025-12-27">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">TPI Number</label>
+                            <input type="text" class="form-input" placeholder="256966" value="256966">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">TPI Expiry Date</label>
+                            <input type="date" class="form-input" value="2025-12-25">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Work Assignment</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label required">Status</label>
+                            <select class="form-select">
+                                <option>Available</option>
+                                <option>Working</option>
+                                <option>Maintenance</option>
+                                <option>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status Description</label>
+                            <input type="text" class="form-input" placeholder="WORKING - CUSTOMER" value="WORKING - CUSTOMER">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Work Type</label>
+                            <select class="form-select">
+                                <option>None</option>
+                                <option>Single Shift</option>
+                                <option>Double Shift</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" class="form-input" placeholder="ARAB KEY GENERAL">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Site / Location</label>
+                            <input type="text" class="form-input" placeholder="Site location">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Site Supervisor</label>
+                            <input type="text" class="form-input" placeholder="Supervisor name">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Marketing Person</label>
+                            <input type="text" class="form-input" placeholder="Marketing person name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Operator Details - 1st Shift</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Timesheet Number</label>
+                            <input type="text" class="form-input" placeholder="Timesheet number" value="25846-25">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LO Number</label>
+                            <input type="text" class="form-input" placeholder="LO number" value="ILSLO-00100-24">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PF Number</label>
+                            <input type="text" class="form-input" placeholder="PF number" value="7795">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Operator Name</label>
+                            <input type="text" class="form-input" placeholder="Biresh Chaudhari" value="Biresh Chaudhari">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Working Hours</label>
+                            <input type="text" class="form-input" placeholder="10" value="10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Operator Details - 2nd Shift</div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Timesheet Number</label>
+                            <input type="text" class="form-input" placeholder="Timesheet number" value="25846-26">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LO Number</label>
+                            <input type="text" class="form-input" placeholder="LO number" value="ILSLO-00100-25">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PF Number</label>
+                            <input type="text" class="form-input" placeholder="PF number" value="7796">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="form-group">
+                            <label class="form-label">Operator Name</label>
+                            <input type="text" class="form-input" placeholder="KUM" value="KUM">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Working Hours</label>
+                            <input type="text" class="form-input" placeholder="e.g., 8" value="8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Working Hours</label>
+                            <input type="text" class="form-input" placeholder="Total hours">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label class="form-label">Reporting Status</label>
+                            <input type="text" class="form-input" placeholder="Reporting status">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="padding: 0 24px 24px;">
+                    <button class="btn btn-secondary" onclick="closeAddEquipmentModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitEquipment()">✓ Add Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+        let isDarkMode = false;
+
+        function switchPage(page, evt) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (evt) evt.currentTarget.classList.add('active');
+
+            if (page === 'dashboard') updateDashboardMetrics();
+        }
+
+        function openAddEquipmentModal() {
+            document.getElementById('addEquipmentModal').classList.add('active');
+        }
+
+        function closeAddEquipmentModal() {
+            document.getElementById('addEquipmentModal').classList.remove('active');
+            document.querySelectorAll('.modal-body .form-input, .modal-body .form-select').forEach(input => {
+                input.value = '';
+            });
+        }
+
+        function submitEquipment() {
+            // Get all form inputs from modal
+            const allInputs = document.querySelectorAll('.modal-body .form-input');
+            const allSelects = document.querySelectorAll('.modal-body .form-select');
+            
+            const fleetNumber = allInputs[2].value.trim(); // Fleet Number
+            const description = allInputs[4].value.trim(); // Fleet Description
+            const type = allInputs[7].value.trim() || 'CC CRANE'; // Fleet Type
+            const make = allInputs[9].value.trim(); // Make
+            const model = allInputs[10].value.trim(); // Model
+            const year = allInputs[11].value.trim() || '2024'; // Model Year
+            const status = allSelects[0].value; // Status dropdown
+            const location = allInputs[14].value.trim() || 'JUBAIL'; // Site Location
+            const customer = allInputs[13].value.trim() || 'N/A'; // Customer Name
+            const supervisor = allInputs[15].value.trim() || 'N/A'; // Site Supervisor
+            
+            // Operator 1st Shift
+            const pf1 = allInputs[18].value.trim() || ''; // PF Number 1st
+            const operator1 = allInputs[19].value.trim() || ''; // Operator Name 1st
+            const hours1 = parseInt(allInputs[20].value) || 0; // Working Hours 1st
+            
+            // Operator 2nd Shift
+            const pf2 = allInputs[23].value.trim() || ''; // PF Number 2nd
+            const operator2 = allInputs[24].value.trim() || ''; // Operator Name 2nd
+            const hours2 = parseInt(allInputs[25].value) || 0; // Working Hours 2nd
+
+            if (!fleetNumber || !description) {
+                alert('Fleet Number and Description are required!');
+                return;
+            }
+
+            equipmentData.push({
+                fleetNumber, description, type, make, model, year, status, location,
+                customer, supervisor, operator1, pf1, hours1, operator2, pf2, hours2
+            });
+
+            renderInventoryTable();
+            updateDashboardMetrics();
+            renderAssignments();
+            renderReports();
+            alert('Equipment added successfully!');
+            closeAddEquipmentModal();
+        }
+
+        function updateDashboardMetrics() {
+            const total = equipmentData.length;
+            const available = equipmentData.filter(e => e.status === 'Available').length;
+            const working = equipmentData.filter(e => e.status === 'Working').length;
+            const maintenance = equipmentData.filter(e => e.status === 'Maintenance').length;
+            const inactive = equipmentData.filter(e => e.status === 'Inactive').length;
+
+            document.getElementById('kpi-total').textContent = total;
+            document.getElementById('kpi-available').textContent = available;
+            document.getElementById('kpi-working').textContent = working;
+            document.getElementById('kpi-maintenance').textContent = maintenance;
+
+            const sum = total || 1;
+            document.getElementById('seg-available').style.width = (available / sum * 100) + '%';
+            document.getElementById('seg-working').style.width = (working / sum * 100) + '%';
+            document.getElementById('seg-maintenance').style.width = (maintenance / sum * 100) + '%';
+            document.getElementById('seg-inactive').style.width = (inactive / sum * 100) + '%';
+
+            document.getElementById('legend-available').textContent = available;
+            document.getElementById('legend-working').textContent = working;
+            document.getElementById('legend-maintenance').textContent = maintenance;
+            document.getElementById('legend-inactive').textContent = inactive;
+
+            renderRecentActivity();
+            renderReports();
+        }
+
+        function renderRecentActivity() {
+            const recentContainer = document.querySelector('.recent-activity');
+            recentContainer.innerHTML = '';
+            equipmentData.slice(-3).reverse().forEach(item => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                recentContainer.innerHTML += `
+                    <div class="activity-item">
+                        <div class="activity-icon">⊞</div>
+                        <div class="activity-info">
+                            <div class="activity-fleet">${item.fleetNumber}</div>
+                            <div class="activity-description">${item.description}</div>
+                        </div>
+                        <div class="activity-status ${statusClass}">${item.status}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventory-body');
+            tbody.innerHTML = '';
+            equipmentData.forEach((item, index) => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.fleetNumber}</td>
+                        <td>${item.description}</td>
+                        <td>${item.type}</td>
+                        <td>${item.make}</td>
+                        <td>${item.model}</td>
+                        <td>${item.year}</td>
+                        <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                        <td>${item.location}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderAssignments() {
+            const container = document.getElementById('assignments-grid');
+            container.innerHTML = '';
+            equipmentData.forEach(item => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                container.innerHTML += `
+                    <div class="assignment-card">
+                        <div class="assignment-header">
+                            <div class="assignment-fleet">
+                                <span class="assignment-number">${item.fleetNumber}</span>
+                                <span style="color: #999;">${item.description}</span>
+                            </div>
+                            <span class="status-badge ${statusClass}">${item.status}</span>
+                        </div>
+                        <div class="assignment-body">
+                            <div class="assignment-detail">
+                                <span class="assignment-label">Location:</span>
+                                <span class="assignment-value">${item.location}</span>
+                            </div>
+                            <div class="assignment-detail">
+                                <span class="assignment-label">Customer:</span>
+                                <span class="assignment-value">${item.customer || '-'}</span>
+                            </div>
+                            <div class="shift-section">
+                                <div class="shift-title">1st Shift</div>
+                                <div class="shift-info">
+                                    <span>👤 ${item.operator1 || '-'}</span>
+                                </div>
+                                <div class="shift-info">
+                                    <span>PF: ${item.pf1 || '-'}</span>
+                                </div>
+                                <div class="shift-info">
+                                    <span>⏱ ${item.hours1 || 0}h</span>
+                                </div>
+                            </div>
+                            ${item.operator2 ? `
+                            <div class="shift-section">
+                                <div class="shift-title">2nd Shift</div>
+                                <div class="shift-info">
+                                    <span>👤 ${item.operator2}</span>
+                                </div>
+                                <div class="shift-info">
+                                    <span>PF: ${item.pf2 || '-'}</span>
+                                </div>
+                                <div class="shift-info">
+                                    <span>⏱ ${item.hours2 || 0}h</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #666;">
+                                <strong>Supervisor:</strong> ${item.supervisor || '-'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function exportToCSV() {
+            const headers = ['S.No', 'Fleet Number', 'Description', 'Type', 'Make', 'Model', 'Year', 'Status', 'Location'];
+            let csv = [headers.join(',')];
+            
+            equipmentData.forEach((item, index) => {
+                const row = [
+                    index + 1,
+                    item.fleetNumber,
+                    item.description,
+                    item.type,
+                    item.make,
+                    item.model,
+                    item.year,
+                    item.status,
+                    item.location
+                ];
+                csv.push(row.map(v => `"${v}"`).join(','));
+            });
+
+            const csvContent = csv.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'fleet-inventory-' + new Date().getTime() + '.csv';
+            link.click();
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                const table = document.querySelector('.table tbody');
+                let rowNumber = table.querySelectorAll('tr').length + 1;
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = lines[i].split(',');
+                    const newRow = table.insertRow();
+                    newRow.innerHTML = `
+                        <td>${rowNumber++}</td>
+                        <td>${values[1] || ''}</td>
+                        <td>${values[2] || ''}</td>
+                        <td>${values[3] || ''}</td>
+                        <td>${values[4] || ''}</td>
+                        <td>${values[5] || ''}</td>
+                        <td>${values[6] || ''}</td>
+                        <td><span class="status-badge status-${(values[7] || 'available').toLowerCase()}">${values[7] || 'Available'}</span></td>
+                        <td>${values[8] || ''}</td>
+                    `;
+                }
+                alert('CSV imported successfully!');
+                updateDashboardMetrics();
+            };
+            reader.readAsText(file);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addEquipmentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddEquipmentModal();
+            }
+        });
+
+        // Theme toggle
+        document.querySelector('.theme-toggle').addEventListener('click', function() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark');
+            this.textContent = isDarkMode ? '☀️' : '🌙';
+        });
+
+        function renderReports() {
+            const tbody = document.getElementById('report-body');
+            tbody.innerHTML = '';
+            let totalHours = 0;
+            equipmentData.forEach((item, index) => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                const hours = (item.hours1 || 0) + (item.hours2 || 0);
+                totalHours += hours;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.fleetNumber}</td>
+                        <td>${item.description}</td>
+                        <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                        <td>${item.customer || '-'}</td>
+                        <td>${item.location}</td>
+                        <td>${item.operator1 || '-'}</td>
+                        <td>${item.operator2 || '-'}</td>
+                        <td>${hours}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('rep-total').textContent = equipmentData.length;
+            document.getElementById('rep-active').textContent = equipmentData.filter(e => e.operator1).length;
+            document.getElementById('rep-hours').textContent = totalHours.toFixed(1);
+        }
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const container = document.querySelector('.container');
+    sidebar.classList.toggle('collapsed');
+    container.classList.toggle('sidebar-collapsed');
+}
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderInventoryTable();
+            updateDashboardMetrics();
+            renderAssignments();
+            renderReports();
+
+            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('csvFileInput').click();
+            });
+
+            document.getElementById('csvFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const csv = event.target.result;
+                    const lines = csv.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length < 2) {
+                        alert('Invalid CSV file');
+                        return;
+                    }
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = lines[i].split(',').map(v => v.trim());
+                        if (values.length < 4) continue;
+
+                        equipmentData.push({
+                            fleetNumber: values[1] || '',
+                            description: values[2] || '',
+                            type: values[3] || '',
+                            make: values[4] || '',
+                            model: values[5] || '',
+                            year: values[6] || '',
+                            status: values[7] || 'Available',
+                            location: values[8] || 'JUBAIL',
+                            operator1: '',
+                            pf1: '',
+                            hours1: 0,
+                            operator2: '',
+                            pf2: '',
+                            hours2: 0,
+                            customer: '',
+                            supervisor: ''
+                        });
+                    }
+
+                    renderInventoryTable();
+                    updateDashboardMetrics();
+                    renderAssignments();
+                    renderReports();
+                    alert('CSV imported successfully!');
+                    document.getElementById('csvFileInput').value = '';
+                };
+                reader.readAsText(file);
+            });
+
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filtered = equipmentData.filter(item => 
+                    item.fleetNumber.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm) ||
+                    item.make.toLowerCase().includes(searchTerm)
+                );
+                
+                const tbody = document.querySelector('#inventory .table tbody');
+                tbody.innerHTML = '';
+                filtered.forEach((item, index) => {
+                    const statusClass = `status-${item.status.toLowerCase()}`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.fleetNumber}</td>
+                            <td>${item.description}</td>
+                            <td>${item.type}</td>
+                            <td>${item.make}</td>
+                            <td>${item.model}</td>
+                            <td>${item.year}</td>
+                            <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                            <td>${item.location}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            document.getElementById('statusFilter').addEventListener('change', function() {
+                const status = this.value;
+                const filtered = status === 'All Status' ? equipmentData : equipmentData.filter(e => e.status === status);
+                
+                const tbody = document.querySelector('#inventory .table tbody');
+                tbody.innerHTML = '';
+                filtered.forEach((item, index) => {
+                    const statusClass = `status-${item.status.toLowerCase()}`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.fleetNumber}</td>
+                            <td>${item.description}</td>
+                            <td>${item.type}</td>
+                            <td>${item.make}</td>
+                            <td>${item.model}</td>
+                            <td>${item.year}</td>
+                            <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                            <td>${item.location}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            document.getElementById('typeFilter').addEventListener('change', function() {
+                const type = this.value;
+                const filtered = type === 'All Types' ? equipmentData : equipmentData.filter(e => e.type === type);
+                
+                const tbody = document.querySelector('#inventory .table tbody');
+                tbody.innerHTML = '';
+                filtered.forEach((item, index) => {
+                    const statusClass = `status-${item.status.toLowerCase()}`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.fleetNumber}</td>
+                            <td>${item.description}</td>
+                            <td>${item.type}</td>
+                            <td>${item.make}</td>
+                            <td>${item.model}</td>
+                            <td>${item.year}</td>
+                            <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                            <td>${item.location}</td>
+                        </tr>
+                    `;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
